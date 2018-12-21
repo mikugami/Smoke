@@ -31,24 +31,21 @@ static float3 base_points[6] = {
  
 static double min_angles[3] = {
     0.1,
-    0.2,
-    0.3
+    0.1,
+    0.1
 };
 
 static double max_angles[3] = {
     0.2,
-    0.3,
-    0.5
+    0.2,
+    0.2
 };
  
 static Smoke smoke_particles[MAX_SMOKE_PARTICLES];
 static float4x4 smoke_offset[MAX_SMOKE_PARTICLES];
 
 SmokeMesh* CreateSmokeMesh() {
-    vector<float> pos { /*
-        -1,  1, -0.5, 1,
-        -1, -1, -0.5, 1,
-         1, -1, -0.5, 1 */
+    vector<float> pos {
          0.03,  0.03,  0.0, 1,
          0.03, -0.03,  0.0, 1,
         -0.03, -0.03,  0.0, 1,
@@ -127,7 +124,7 @@ static void InitSmoke()
 
 int cam_dist_compare(const void *a, const void *b)
 {
-    return ((Smoke *)b)->dist_to_cam < ((Smoke *)a)->dist_to_cam - ((Smoke *)b)->dist_to_cam > ((Smoke *)a)->dist_to_cam;
+    return ((Smoke *)b)->dist_to_cam > ((Smoke *)a)->dist_to_cam - ((Smoke *)b)->dist_to_cam < ((Smoke *)a)->dist_to_cam;
 }
  
 void SmokeMesh::UpdateParticles(float deltaTime, Camera &camera)
@@ -166,7 +163,10 @@ void SmokeMesh::UpdateParticles(float deltaTime, Camera &camera)
             smoke_particles[i].position.z += smoke_particles[i].velocity * sin(smoke_particles[i].angle) * deltaTime;
             smoke_particles[i].position.y += smoke_particles[i].velocity * sin(smoke_particles[i].y_angle) * deltaTime;
         }
-        smoke_particles[i].dist_to_cam = length(camera.pos - smoke_particles[i].position);
+        //smoke_particles[i].dist_to_cam = length(camera.pos - smoke_particles[i].position);
+        smoke_particles[i].dist_to_cam = (camera.pos - smoke_particles[i].position).x * (camera.pos - smoke_particles[i].position).x +
+                (camera.pos - smoke_particles[i].position).y * (camera.pos - smoke_particles[i].position).y +
+                (camera.pos - smoke_particles[i].position).z * (camera.pos - smoke_particles[i].position).z;
     }
     qsort(smoke_particles, MAX_SMOKE_PARTICLES, sizeof(Smoke), cam_dist_compare);
     for (int i = 0; i < MAX_SMOKE_PARTICLES; ++i) {
